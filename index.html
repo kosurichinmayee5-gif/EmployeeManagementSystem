@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#03050b">
+  <title>PeopleHub — Next-Gen Spatial Workforce OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #03050b;
+      --surface: rgba(12, 18, 33, 0.72);
+      --surface-solid: #090e1a;
+      --surface-glass: rgba(18, 26, 48, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(56, 189, 248, 0.25);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --cyan: #38bdf8;
+      --emerald: #34d399;
+      --violet: #818cf8;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --grad-main: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
+      --glow-main: rgba(56, 189, 248, 0.28);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 10%, rgba(129, 140, 248, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 100%, rgba(52, 211, 153, 0.08) 0%, transparent 50%),
+        radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px;
+      font: 14px/1.55 "Plus Jakarta Sans", sans-serif;
+      overflow-x: hidden;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    /* AUTH SPLIT SCREEN */
+    #authOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .auth-banner {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 56px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(129, 140, 248, 0.15), transparent 50%),
+        linear-gradient(160deg, #060a17 0%, #03050b 100%);
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      width: fit-content;
+      padding: 8px 18px 8px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 99px;
+      font: 700 18px "Space Grotesk", sans-serif;
+      letter-spacing: -0.5px;
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: #03050b;
+      background: var(--grad-main);
+      font-weight: 800;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    }
+
+    .banner-content h1 {
+      margin: 0 0 16px;
+      font: 800 clamp(34px, 4vw, 52px)/1.08 "Space Grotesk", sans-serif;
+      letter-spacing: -1.8px;
+    }
+
+    .banner-content h1 span {
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .banner-content p { color: var(--muted); font-size: 15px; max-width: 440px; margin: 0; }
+
+    .banner-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 500px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card strong { display: block; font: 700 24px "Space Grotesk", sans-serif; color: var(--cyan); }
+    .stat-card small { color: var(--muted); font-size: 11px; }
+
+    .auth-form-panel {
+      display: grid;
+      place-items: center;
+      padding: 40px 28px;
+      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.05), transparent 60%);
+    }
+
+    .auth-box { width: min(100%, 410px); }
+
+    .tab-switcher {
+      display: inline-flex;
+      padding: 4px;
+      margin-bottom: 26px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+    }
+
+    .tab-switcher button {
+      padding: 8px 22px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 99px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .tab-switcher button.active {
+      color: #03050b;
+      background: var(--grad-main);
+      font-weight: 700;
+      box-shadow: 0 4px 16px var(--glow-main);
+    }
+
+    .demo-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .demo-btn {
+      padding: 11px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: .2s;
+    }
+
+    .demo-btn:hover { border-color: var(--cyan); background: rgba(56, 189, 248, 0.1); transform: translateY(-1px); }
+
+    /* TOP HUD & SPATIAL DOCK */
+    #appContainer { display: none; min-height: 100vh; padding-bottom: 110px; }
+    #appContainer.visible { display: block; }
+
+    .top-hud {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 18px clamp(18px, 4vw, 44px);
+      background: linear-gradient(to bottom, rgba(3, 5, 11, 0.95), rgba(3, 5, 11, 0.7) 75%, transparent);
+      backdrop-filter: blur(14px);
+    }
+
+    .hud-left { display: flex; align-items: center; gap: 16px; }
+    .hud-sep { width: 1px; height: 22px; background: rgba(255, 255, 255, 0.12); }
+    .hud-path { font: 500 11px "JetBrains Mono", monospace; color: var(--muted); letter-spacing: 0.6px; }
+    .hud-path b { color: var(--cyan); font-weight: 600; }
+
+    .hud-right { display: flex; align-items: center; gap: 10px; }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font: 500 11px "JetBrains Mono", monospace;
+      color: var(--muted);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 14px 5px 6px;
+      background: var(--surface-glass);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 99px;
+    }
+
+    .user-av {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--grad-main);
+      color: #03050b;
+      font-weight: 800;
+      font-size: 11px;
+    }
+
+    .user-info strong { display: block; font-size: 12px; line-height: 1.15; }
+    .user-info small { color: var(--cyan); font-size: 10px; font-weight: 600; }
+
+    .hud-icon-btn {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      transition: .2s;
+    }
+
+    .hud-icon-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(56, 189, 248, 0.1); }
+
+    .command-dock {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px;
+      background: rgba(10, 15, 28, 0.88);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 99px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(56, 189, 248, 0.1);
+    }
+
+    .dock-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dock-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); }
+    .dock-tab.active {
+      color: #03050b;
+      background: var(--grad-main);
+      font-weight: 700;
+      box-shadow: 0 6px 20px var(--glow-main);
+    }
+
+    .kbd {
+      padding: 1px 6px;
+      font: 500 9px "JetBrains Mono", monospace;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+    }
+    .dock-tab.active .kbd { background: rgba(3, 5, 11, 0.2); }
+
+    /* WORKSPACE */
+    .workspace {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 8px clamp(18px, 4vw, 44px) 24px;
+    }
+
+    .view-pane { display: none; animation: fadeIn .32s cubic-bezier(0.16, 1, 0.3, 1); }
+    .view-pane.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .section-title h1 {
+      margin: 0 0 4px;
+      font: 800 clamp(28px, 3.6vh, 42px)/1.08 "Space Grotesk", sans-serif;
+      letter-spacing: -1.5px;
+    }
+
+    .section-title h1 span {
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-title p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .bento-card {
+      position: relative;
+      min-width: 0;
+      padding: 24px;
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+      transition: border-color .22s, transform .22s;
+    }
+
+    .bento-card:hover { border-color: rgba(255, 255, 255, 0.16); }
+
+    .card-shift {
+      grid-column: span 5;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at 95% 10%, rgba(56, 189, 248, 0.15), transparent 55%),
+        linear-gradient(155deg, rgba(14, 22, 40, 0.9), rgba(8, 12, 24, 0.95));
+    }
+
+    .shift-console {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 24px;
+      padding: 15px 18px;
+      background: rgba(3, 5, 11, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+    }
+
+    .timer-display { font: 600 24px "JetBrains Mono", monospace; letter-spacing: -0.5px; }
+
+    .card-donut {
+      grid-column: span 4;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .donut-wrap { position: relative; width: 122px; height: 122px; flex-shrink: 0; }
+    .donut-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .donut-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+    .donut-center strong { display: block; font: 800 26px "Space Grotesk", sans-serif; line-height: 1; }
+    .donut-center small { font: 500 9px "JetBrains Mono", monospace; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+    .donut-legend { display: grid; gap: 9px; flex: 1; }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+    .legend-lbl { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .card-kpi-stack {
+      grid-column: span 3;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .kpi-box {
+      padding: 18px 20px;
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-box strong { font: 800 28px "Space Grotesk", sans-serif; display: block; line-height: 1.1; }
+    .kpi-box span { color: var(--muted); font-size: 11px; }
+    .badge-tag { padding: 5px 10px; border-radius: 10px; font: 600 10px "JetBrains Mono", monospace; }
+
+    .card-roster { grid-column: span 7; }
+    .card-kudos { grid-column: span 5; }
+    .card-depts { grid-column: span 12; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .card-header h2 { margin: 0; font: 700 17px "Space Grotesk", sans-serif; letter-spacing: -0.3px; }
+    .mono-label { font: 500 10px "JetBrains Mono", monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 1.1px; }
+
+    /* BUTTONS & CONTROLS */
+    .btn-primary, .btn-secondary, .btn-danger {
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 13px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: .2s;
+    }
+
+    .btn-primary { color: #03050b; background: var(--grad-main); box-shadow: 0 6px 20px var(--glow-main); }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .btn-secondary { color: var(--text); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14); }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--cyan); }
+
+    .btn-danger { color: #fecdd3; background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.35); }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .input-field, .select-field {
+      padding: 11px 14px;
+      color: var(--text);
+      background: rgba(3, 5, 11, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      font-size: 12px;
+      outline: none;
+    }
+    .input-field { flex: 1; min-width: 220px; }
+    .input-field:focus, .select-field:focus, .field-wrap input:focus, .field-wrap select:focus, .field-wrap textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px var(--glow-main);
+    }
+
+    /* TABLES */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      padding: 11px 12px;
+      color: var(--muted);
+      font: 500 10px "JetBrains Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 14px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.045); font-size: 13px; white-space: nowrap; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+
+    .person-row { display: flex; align-items: center; gap: 12px; }
+    .person-av {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(129, 140, 248, 0.18));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--cyan);
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .person-row small { display: block; color: var(--muted); font-size: 11px; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 11px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-pill.active { color: var(--emerald); background: rgba(52, 211, 153, 0.14); border: 1px solid rgba(52, 211, 153, 0.25); }
+    .status-pill.on-leave { color: var(--amber); background: rgba(251, 191, 36, 0.14); border: 1px solid rgba(251, 191, 36, 0.25); }
+    .status-pill.inactive { color: var(--rose); background: rgba(244, 63, 94, 0.14); border: 1px solid rgba(244, 63, 94, 0.25); }
+
+    .table-action-btn {
+      padding: 6px 11px;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 4px;
+      transition: .15s;
+    }
+    .table-action-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(56, 189, 248, 0.1); }
+    .table-action-btn.del:hover { border-color: var(--rose); color: var(--rose); background: rgba(244, 63, 94, 0.1); }
+
+    /* KUDOS & DEPARTMENTS */
+    .kudos-feed { display: grid; gap: 12px; }
+    .kudos-card {
+      padding: 15px 16px;
+      background: rgba(3, 5, 11, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .kudos-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .kudos-badge-tag { font-size: 11px; color: var(--amber); background: rgba(251, 191, 36, 0.12); padding: 3px 10px; border-radius: 99px; }
+
+    .dept-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .dept-item {
+      padding: 18px;
+      background: rgba(3, 5, 11, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+    }
+    .dept-item-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .dept-item-top strong { font: 800 24px "Space Grotesk", sans-serif; color: var(--cyan); }
+    .progress-track { height: 6px; background: rgba(255, 255, 255, 0.07); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--grad-main); border-radius: 99px; }
+
+    .payroll-split-bar {
+      display: flex;
+      height: 12px;
+      border-radius: 99px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 14px 0 10px;
+      gap: 2px;
+    }
+
+    /* MODALS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(2, 4, 8, 0.86);
+      backdrop-filter: blur(14px);
+    }
+    .modal-overlay.show { display: grid; }
+    .modal-card {
+      width: min(100%, 500px);
+      padding: 28px;
+      background: var(--surface-solid);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 26px;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.85);
+    }
+    .modal-card h2 { margin: 0 0 4px; font: 700 22px "Space Grotesk", sans-serif; }
+    .modal-card > p { margin: 0 0 20px; color: var(--muted); font-size: 12px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .field-wrap { margin-bottom: 14px; }
+    .field-wrap.span2 { grid-column: 1 / -1; }
+    .field-wrap label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 11px; font-weight: 600; }
+    .field-wrap input, .field-wrap select, .field-wrap textarea {
+      width: 100%;
+      padding: 11px 14px;
+      color: var(--text);
+      background: #03050b;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 12px;
+      outline: none;
+    }
+    .field-wrap textarea { min-height: 78px; resize: vertical; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+
+    /* TOAST */
+    .toast-popup {
+      position: fixed;
+      top: 22px;
+      left: 50%;
+      transform: translate(-50%, -24px);
+      z-index: 300;
+      padding: 11px 22px;
+      color: #03050b;
+      background: var(--grad-main);
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 12px 32px var(--glow-main);
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-popup.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 1040px) {
+      .card-shift { grid-column: span 12; }
+      .card-donut { grid-column: span 6; }
+      .card-kpi-stack { grid-column: span 6; }
+      .card-roster, .card-kudos { grid-column: span 12; }
+    }
+
+    @media (max-width: 820px) {
+      #authOverlay { grid-template-columns: 1fr; }
+      .auth-banner { display: none; }
+      .card-donut, .card-kpi-stack { grid-column: span 12; }
+      .command-dock { width: calc(100% - 24px); justify-content: space-around; padding: 6px; bottom: 12px; }
+      .dock-tab { padding: 9px 12px; font-size: 11px; }
+      .kbd, .hud-path, .live-badge { display: none; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AUTH SCREEN -->
+  <div id="authOverlay">
+    <div class="auth-banner">
+      <div class="brand-pill">
+        <div class="brand-icon">P</div>
+        <span>PeopleHub OS</span>
+      </div>
+      <div class="banner-content">
+        <h1>Workforce intelligence,<br>engineered for <span>flow.</span></h1>
+        <p>A next-gen spatial command center to manage 40 elite team members, track live shifts, review leaves, and govern payroll.</p>
+      </div>
+      <div class="banner-stats">
+        <div class="stat-card">
+          <strong>40</strong>
+          <small>Elite staff records</small>
+        </div>
+        <div class="stat-card">
+          <strong>9 Depts</strong>
+          <small>Global sync</small>
+        </div>
+        <div class="stat-card">
+          <strong>Real-Time</strong>
+          <small>Admin controls</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-form-panel">
+      <div class="auth-box">
+        <div class="tab-switcher">
+          <button class="active" id="tabLoginBtn" onclick="switchAuthMode('login')">Sign In</button>
+          <button id="tabRegisterBtn" onclick="switchAuthMode('register')">Register</button>
+        </div>
+
+        <h2 style="margin: 0 0 6px; font: 700 28px 'Space Grotesk', sans-serif;" id="authHeading">Welcome back</h2>
+        <p style="margin: 0 0 22px; color: var(--muted); font-size: 13px;" id="authSub">Sign in with your email — your display name auto-syncs instantly.</p>
+
+        <form id="authForm" onsubmit="handleAuthSubmit(event)">
+          <div class="field-wrap hidden" id="nameFieldWrap">
+            <label for="authName">Full Name</label>
+            <input id="authName" placeholder="e.g. Rahul Verma">
+          </div>
+          <div class="field-wrap">
+            <label for="authEmail">Work Email</label>
+            <input id="authEmail" type="email" required placeholder="rahul.verma@company.com">
+          </div>
+          <div class="field-wrap">
+            <label for="authPassword">Password</label>
+            <input id="authPassword" type="password" required placeholder="••••••••">
+          </div>
+          <div class="field-wrap">
+            <label for="authRole">Workspace Role</label>
+            <select id="authRole">
+              <option value="Administrator">Administrator (HR, Leave &amp; Payroll Approver)</option>
+              <option value="Employee">Employee (Self-Service Access)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; padding: 13px;" id="authSubmitBtn">Enter Workspace →</button>
+        </form>
+
+        <div class="demo-bar">
+          <button type="button" class="demo-btn" onclick="fillDemo('admin')">⚡ Admin Demo</button>
+          <button type="button" class="demo-btn" onclick="fillDemo('employee')">👤 Employee Demo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div id="appContainer">
+    <header class="top-hud">
+      <div class="hud-left">
+        <div class="brand-pill" style="padding: 5px 14px 5px 6px; font-size: 15px;">
+          <div class="brand-icon" style="width: 28px; height: 28px; font-size: 13px;">P</div>
+          <span>PeopleHub</span>
+        </div>
+        <div class="hud-sep"></div>
+        <div class="hud-path">WORKSPACE // <b id="breadcrumb">COMMAND DECK</b></div>
+      </div>
+
+      <div class="hud-right">
+        <div class="live-badge">
+          <span class="pulse-dot"></span>
+          <span id="currentDate"></span>
+        </div>
+        <button class="hud-icon-btn" title="Alerts" onclick="showToast('System operational. All 40 records healthy.')">🔔</button>
+        <div class="user-pill">
+          <div class="user-av" id="userAvatar">AM</div>
+          <div class="user-info">
+            <strong id="userName">Alex Morgan</strong>
+            <small id="userRole">Administrator</small>
+          </div>
+        </div>
+        <button class="hud-icon-btn" title="Sign Out" onclick="logoutUser()">⎋</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <!-- VIEW 1: DASHBOARD -->
+      <section class="view-pane active" id="view-dashboard">
+        <div class="section-title">
+          <div>
+            <h1>Good day, <span id="greetingName">Alex</span>.</h1>
+            <p>Live workforce telemetry, shift timer, and recognition feed.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="openKudosModal()">✨ Send Kudos</button>
+            <button class="btn-primary admin-only" onclick="openEmployeeModal()">＋ New Employee</button>
+          </div>
+        </div>
+
+        <div class="bento-grid">
+          <article class="bento-card card-shift">
+            <div>
+              <span class="mono-label">ACTIVE SHIFT TELEMETRY</span>
+              <h2 style="margin: 10px 0 6px; font: 700 22px 'Space Grotesk', sans-serif;">Ready for deep work?</h2>
+              <p style="margin: 0; color: var(--muted); font-size: 12px;">Clock in to record your active work session into today's attendance logs.</p>
+            </div>
+            <div class="shift-console">
+              <div>
+                <div style="font-size: 10px; color: var(--cyan); font-weight: 700; text-transform: uppercase;" id="shiftStatusBadge">Standby</div>
+                <div class="timer-display" id="shiftTimerDisplay">00:00:00</div>
+              </div>
+              <button class="btn-primary" id="clockToggleBtn" onclick="toggleShift()">Clock In</button>
+            </div>
+          </article>
+
+          <article class="bento-card card-donut">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 36 36">
+                <defs>
+                  <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#38bdf8"/>
+                    <stop offset="100%" stop-color="#34d399"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="3.2"></circle>
+                <circle id="donutActiveArc" cx="18" cy="18" r="15.5" fill="none" stroke="url(#donutGrad)" stroke-width="3.2" stroke-dasharray="90 100" stroke-linecap="round"></circle>
+              </svg>
+              <div class="donut-center">
+                <strong id="headcount">40</strong>
+                <small>Total</small>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div class="mono-label" style="margin-bottom: 4px;">ROSTER BREAKDOWN</div>
+              <div class="legend-row">
+                <span class="legend-lbl"><span class="dot" style="background: var(--emerald);"></span>Active</span>
+                <strong id="presentCount">0</strong>
+              </div>
+              <div class="legend-row">
+                <span class="legend-lbl"><span class="dot" style="background: var(--amber);"></span>On Leave</span>
+                <strong id="leaveCount">0</strong>
+              </div>
+              <div class="legend-row">
+                <span class="legend-lbl"><span class="dot" style="background: var(--violet);"></span>Depts</span>
+                <strong id="departmentCount">0</strong>
+              </div>
+            </div>
+          </article>
+
+          <div class="card-kpi-stack">
+            <div class="kpi-box">
+              <div>
+                <strong id="pendingCount">0</strong>
+                <span>Pending Approvals</span>
+              </div>
+              <span class="badge-tag" style="background: rgba(251, 191, 36, 0.15); color: var(--amber);">QUEUE</span>
+            </div>
+            <div class="kpi-box">
+              <div>
+                <strong id="dashPayrollMini">₹0</strong>
+                <span>Monthly Payroll</span>
+              </div>
+              <span class="badge-tag" style="background: rgba(129, 140, 248, 0.16); color: var(--violet);">BUDGET</span>
+            </div>
+          </div>
+
+          <article class="bento-card card-roster">
+            <div class="card-header">
+              <h2>Team Roster Highlights</h2>
+              <button class="table-action-btn" onclick="navigate('employees')">Full Directory (40) ↗</button>
+            </div>
+            <div id="dashboardEmployees"></div>
+          </article>
+
+          <article class="bento-card card-kudos">
+            <div class="card-header">
+              <h2>Recognition Feed</h2>
+              <span class="mono-label">CULTURE PULSE</span>
+            </div>
+            <div class="kudos-feed" id="kudosFeedContainer"></div>
+          </article>
+
+          <article class="bento-card card-depts">
+            <div class="card-header">
+              <h2>Department Distribution</h2>
+              <button class="table-action-btn admin-only" onclick="exportCSV()">⇩ Export CSV</button>
+            </div>
+            <div class="dept-strip">
+              <div class="dept-item">
+                <div class="dept-item-top"><span class="mono-label">Engineering &amp; Tech</span><strong id="engineeringCount">0</strong></div>
+                <div class="progress-track"><div class="progress-fill" id="engineeringProgress" style="width:0%"></div></div>
+              </div>
+              <div class="dept-item">
+                <div class="dept-item-top"><span class="mono-label">Design &amp; Product</span><strong id="productCount">0</strong></div>
+                <div class="progress-track"><div class="progress-fill" id="productProgress" style="width:0%"></div></div>
+              </div>
+              <div class="dept-item">
+                <div class="dept-item-top"><span class="mono-label">Ops, HR &amp; Finance</span><strong id="opsCount">0</strong></div>
+                <div class="progress-track"><div class="progress-fill" id="opsProgress" style="width:0%"></div></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- VIEW 2: EMPLOYEES -->
+      <section class="view-pane" id="view-employees">
+        <div class="section-title">
+          <div>
+            <h1>People <span>Directory.</span></h1>
+            <p>Browse and manage all 40 professional organizational profiles.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary admin-only" onclick="exportCSV()">⇩ Export CSV</button>
+            <button class="btn-primary admin-only" onclick="openEmployeeModal()">＋ Add Employee</button>
+          </div>
+        </div>
+        <article class="bento-card">
+          <div class="toolbar">
+            <input class="input-field" id="employeeSearch" placeholder="Search by name, email, or role..." oninput="renderEmployees()">
+            <select class="select-field" id="departmentFilter" onchange="renderEmployees()"><option value="All">All Departments</option></select>
+            <select class="select-field" id="statusFilter" onchange="renderEmployees()"><option value="All">All Statuses</option><option>Active</option><option>On leave</option><option>Inactive</option></select>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Member</th><th>Department</th><th>Role</th><th>Joined</th><th>Status</th><th class="admin-only">Manage</th></tr></thead>
+              <tbody id="employeeTable"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- VIEW 3: ATTENDANCE -->
+      <section class="view-pane" id="view-attendance">
+        <div class="section-title">
+          <div>
+            <h1>Shift <span>Attendance.</span></h1>
+            <p>Daily check-in logs and presence verification for all team members.</p>
+          </div>
+          <span class="mono-label" id="attendanceDate"></span>
+        </div>
+        <article class="bento-card">
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Member</th><th>Department</th><th>Status</th><th>Check-In</th><th>Action</th></tr></thead>
+              <tbody id="attendanceTable"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- VIEW 4: LEAVE -->
+      <section class="view-pane" id="view-leave">
+        <div class="section-title">
+          <div>
+            <h1>Time-Off <span>Requests.</span></h1>
+            <p>Submit leave applications or review pending team requests.</p>
+          </div>
+          <button class="btn-primary" onclick="openLeaveModal()">＋ Request Leave</button>
+        </div>
+        <article class="bento-card">
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Member</th><th>Type</th><th>Duration</th><th>Note</th><th>Status</th><th>Decision (Admin)</th></tr></thead>
+              <tbody id="leaveTable"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- VIEW 5: PAYROLL -->
+      <section class="view-pane" id="view-payroll">
+        <div class="section-title">
+          <div>
+            <h1>Compensation <span>Ledger.</span></h1>
+            <p>Secure monthly salary overview, budget allocation, and admin governance.</p>
+          </div>
+          <span class="mono-label" id="payrollMonth"></span>
+        </div>
+        <div class="bento-grid">
+          <div class="bento-card" style="grid-column: span 4;">
+            <span class="mono-label">TOTAL MONTHLY PAYROLL</span>
+            <div style="font: 800 30px 'Space Grotesk', sans-serif; color: var(--cyan); margin-top: 8px;" id="payrollTotal">₹0</div>
+          </div>
+          <div class="bento-card" style="grid-column: span 4;">
+            <span class="mono-label">AVERAGE COMPENSATION</span>
+            <div style="font: 800 30px 'Space Grotesk', sans-serif; margin-top: 8px;" id="averageSalary">₹0</div>
+          </div>
+          <div class="bento-card" style="grid-column: span 4;">
+            <span class="mono-label">COVERED HEADCOUNT</span>
+            <div style="font: 800 30px 'Space Grotesk', sans-serif; color: var(--violet); margin-top: 8px;" id="payrollEmployees">0</div>
+          </div>
+          <article class="bento-card" style="grid-column: span 12;">
+            <div class="card-header">
+              <h2>Departmental Payroll Distribution</h2>
+              <span class="mono-label">PROPORTIONAL SPLIT</span>
+            </div>
+            <div class="payroll-split-bar" id="payrollSplitBar"></div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; color: var(--muted);" id="payrollSplitLegend"></div>
+          </article>
+          <article class="bento-card" style="grid-column: span 12;">
+            <div class="card-header">
+              <h2>Payroll Breakdown</h2>
+              <span class="mono-label">ADMIN PRIVILEGE</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead><tr><th>Member</th><th>Department</th><th>Role</th><th>Monthly Salary</th><th class="admin-only">Action</th></tr></thead>
+                <tbody id="payrollTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- FLOATING COMMAND DOCK -->
+    <nav class="command-dock" aria-label="Primary Navigation">
+      <button class="dock-tab active" data-view="dashboard"><span>⌘</span> Deck <span class="kbd">1</span></button>
+      <button class="dock-tab" data-view="employees"><span>♙</span> Directory <span class="kbd">2</span></button>
+      <button class="dock-tab" data-view="attendance"><span>◷</span> Shifts <span class="kbd">3</span></button>
+      <button class="dock-tab" data-view="leave"><span>▣</span> Leave <span class="kbd">4</span></button>
+      <button class="dock-tab" data-view="payroll"><span>₹</span> Payroll <span class="kbd">5</span></button>
+    </nav>
+  </div>
+
+  <!-- MODAL: EMPLOYEE -->
+  <div class="modal-overlay" id="employeeModal">
+    <div class="modal-card">
+      <h2 id="employeeModalTitle">Add Team Member</h2>
+      <p>Create or update an employee record in the directory.</p>
+      <form id="employeeForm" onsubmit="handleEmployeeSubmit(event)">
+        <div class="form-grid">
+          <div class="field-wrap"><label for="empName">Full Name</label><input id="empName" required placeholder="e.g. Priya Sharma"></div>
+          <div class="field-wrap"><label for="empEmail">Work Email</label><input id="empEmail" type="email" required placeholder="name@company.com"></div>
+          <div class="field-wrap"><label for="empDepartment">Department</label><select id="empDepartment" required></select></div>
+          <div class="field-wrap"><label for="empRole">Job Title</label><input id="empRole" required placeholder="e.g. Senior Architect"></div>
+          <div class="field-wrap"><label for="empStart">Start Date</label><input id="empStart" type="date" required></div>
+          <div class="field-wrap"><label for="empStatus">Status</label><select id="empStatus"><option>Active</option><option>On leave</option><option>Inactive</option></select></div>
+          <div class="field-wrap span2"><label for="empSalary">Monthly Salary (₹)</label><input id="empSalary" type="number" min="0" required placeholder="e.g. 95000"></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" onclick="closeModal('employeeModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: LEAVE -->
+  <div class="modal-overlay" id="leaveModal">
+    <div class="modal-card">
+      <h2>Request Time Off</h2>
+      <p>Submit a new leave request for admin review.</p>
+      <form id="leaveForm" onsubmit="handleLeaveSubmit(event)">
+        <div class="form-grid">
+          <div class="field-wrap span2"><label for="leaveType">Leave Category</label><select id="leaveType"><option>Annual Leave</option><option>Sick Leave</option><option>Personal Leave</option><option>Unpaid Leave</option></select></div>
+          <div class="field-wrap"><label for="leaveStart">From</label><input id="leaveStart" type="date" required></div>
+          <div class="field-wrap"><label for="leaveEnd">To</label><input id="leaveEnd" type="date" required></div>
+          <div class="field-wrap span2"><label for="leaveReason">Notes</label><textarea id="leaveReason" required placeholder="Context for leave review..."></textarea></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" onclick="closeModal('leaveModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: KUDOS -->
+  <div class="modal-overlay" id="kudosModal">
+    <div class="modal-card">
+      <h2>Send Recognition Kudos</h2>
+      <p>Highlight a teammate's great work on the live feed.</p>
+      <form id="kudosForm" onsubmit="handleKudosSubmit(event)">
+        <div class="field-wrap"><label for="kudosTo">Recipient Name</label><input id="kudosTo" required placeholder="e.g. Aarav Nair"></div>
+        <div class="field-wrap"><label for="kudosBadge">Badge</label><select id="kudosBadge"><option>🚀 High Impact</option><option>🤝 Team Catalyst</option><option>💡 Deep Craft</option><option>⚡ Fast Execution</option></select></div>
+        <div class="field-wrap"><label for="kudosMessage">Shoutout</label><textarea id="kudosMessage" required placeholder="Share what made their contribution awesome..."></textarea></div>
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" onclick="closeModal('kudosModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Publish Kudos</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-popup" id="toast"></div>
+
+  <script>
+    const departments = ["Engineering", "Design", "Product", "Marketing", "Sales", "Finance", "Human Resources", "Operations", "Customer Support"];
+
+    // 40 BRAND-NEW COMPREHENSIVE EMPLOYEE RECORDS
+    const masterEmployees40 = [
+      {id:"e01",name:"Aarav Nair",email:"aarav.nair@company.com",department:"Engineering",role:"Principal Cloud Architect",start:"2021-03-15",status:"Active",salary:145000},
+      {id:"e02",name:"Diya Kulkarni",email:"diya.kulkarni@company.com",department:"Product",role:"VP of Product Strategy",start:"2020-08-10",status:"Active",salary:160000},
+      {id:"e03",name:"Ishaan Chatterjee",email:"ishaan.chatterjee@company.com",department:"Engineering",role:"Staff Backend Engineer",start:"2022-01-18",status:"Active",salary:122000},
+      {id:"e04",name:"Kavya Menon",email:"kavya.menon@company.com",department:"Design",role:"Head of Design Systems",start:"2021-11-02",status:"Active",salary:118000},
+      {id:"e05",name:"Siddharth Malhotra",email:"siddharth.malhotra@company.com",department:"Finance",role:"Director of Finance",start:"2021-05-24",status:"Active",salary:135000},
+      {id:"e06",name:"Nandini Deshmukh",email:"nandini.deshmukh@company.com",department:"Human Resources",role:"Chief People Officer",start:"2020-11-12",status:"Active",salary:140000},
+      {id:"e07",name:"Vivaan Saxena",email:"vivaan.saxena@company.com",department:"Engineering",role:"Senior Frontend Engineer",start:"2022-07-04",status:"Active",salary:98000},
+      {id:"e08",name:"Anika Bansal",email:"anika.bansal@company.com",department:"Marketing",role:"Brand Strategy Lead",start:"2023-02-14",status:"Active",salary:88000},
+      {id:"e09",name:"Reyansh Pillai",email:"reyansh.pillai@company.com",department:"Sales",role:"Enterprise Sales Director",start:"2021-09-20",status:"Active",salary:128000},
+      {id:"e10",name:"Myra Sengupta",email:"myra.sengupta@company.com",department:"Design",role:"Senior UX Researcher",start:"2023-04-03",status:"On leave",salary:86000},
+      {id:"e11",name:"Advait Joshi",email:"advait.joshi@company.com",department:"Operations",role:"Site Reliability Lead",start:"2022-03-28",status:"Active",salary:112000},
+      {id:"e12",name:"Tara Choudhury",email:"tara.choudhury@company.com",department:"Customer Support",role:"Customer Experience Manager",start:"2022-10-11",status:"Active",salary:76000},
+      {id:"e13",name:"Karanbir Gill",email:"karanbir.gill@company.com",department:"Engineering",role:"Mobile Platform Engineer",start:"2023-06-19",status:"Active",salary:94000},
+      {id:"e14",name:"Zoya Mirza",email:"zoya.mirza@company.com",department:"Product",role:"Senior Product Manager",start:"2022-08-22",status:"Active",salary:108000},
+      {id:"e15",name:"Pranav Hegde",email:"pranav.hegde@company.com",department:"Finance",role:"Senior Tax & Treasury Analyst",start:"2023-01-09",status:"Active",salary:82000},
+      {id:"e16",name:"Ritika Subramanian",email:"ritika.subramanian@company.com",department:"Human Resources",role:"Talent Acquisition Lead",start:"2023-05-15",status:"Active",salary:79000},
+      {id:"e17",name:"Harshvardhan Rao",email:"harshvardhan.rao@company.com",department:"Engineering",role:"Machine Learning Engineer",start:"2023-09-01",status:"Active",salary:116000},
+      {id:"e18",name:"Shruti Trivedi",email:"shruti.trivedi@company.com",department:"Marketing",role:"Performance Marketing Specialist",start:"2024-01-22",status:"Active",salary:72000},
+      {id:"e19",name:"Yashwardhan Tiwari",email:"yashwardhan.tiwari@company.com",department:"Sales",role:"Mid-Market Account Executive",start:"2023-11-06",status:"Active",salary:84000},
+      {id:"e20",name:"Ira Bhattacharya",email:"ira.bhattacharya@company.com",department:"Design",role:"Motion & Visual Designer",start:"2024-03-18",status:"Active",salary:74000},
+      {id:"e21",name:"Nikhil Shetty",email:"nikhil.shetty@company.com",department:"Operations",role:"Security & Compliance Officer",start:"2022-04-25",status:"Active",salary:105000},
+      {id:"e22",name:"Pooja Nambiar",email:"pooja.nambiar@company.com",department:"Customer Support",role:"Technical Support Specialist",start:"2024-05-13",status:"Active",salary:62000},
+      {id:"e23",name:"Samarth Kulkarni",email:"samarth.kulkarni@company.com",department:"Engineering",role:"Full-Stack Developer",start:"2024-07-08",status:"Active",salary:85000},
+      {id:"e24",name:"Avni Mathur",email:"avni.mathur@company.com",department:"Product",role:"Product Operations Analyst",start:"2024-08-19",status:"Active",salary:78000},
+      {id:"e25",name:"Dhruv Kapoor",email:"dhruv.kapoor@company.com",department:"Sales",role:"Solutions Consultant",start:"2023-03-14",status:"Active",salary:96000},
+      {id:"e26",name:"Sneha Venkatesh",email:"sneha.venkatesh@company.com",department:"Finance",role:"Payroll & Accounts Specialist",start:"2024-02-05",status:"Active",salary:68000},
+      {id:"e27",name:"Manish Rathore",email:"manish.rathore@company.com",department:"Operations",role:"Workplace & Facilities Lead",start:"2022-12-01",status:"Inactive",salary:64000},
+      {id:"e28",name:"Aishwarya Krishnan",email:"aishwarya.krishnan@company.com",department:"Engineering",role:"QA Automation Lead",start:"2023-08-07",status:"Active",salary:89000},
+      {id:"e29",name:"Kabir Suri",email:"kabir.suri@company.com",department:"Engineering",role:"DevSecOps Engineer",start:"2023-10-12",status:"Active",salary:99000},
+      {id:"e30",name:"Tanvi Mahajan",email:"tanvi.mahajan@company.com",department:"Marketing",role:"Content & PR Director",start:"2021-06-14",status:"Active",salary:110000},
+      {id:"e31",name:"Rohan Vaidya",email:"rohan.vaidya@company.com",department:"Sales",role:"Global Partnerships Manager",start:"2022-09-18",status:"Active",salary:115000},
+      {id:"e32",name:"Mehul Parekh",email:"mehul.parekh@company.com",department:"Customer Support",role:"Support Escalations Lead",start:"2021-04-20",status:"Active",salary:70000},
+      {id:"e33",name:"Divya Swaminathan",email:"divya.swaminathan@company.com",department:"Design",role:"Product Design Lead",start:"2022-05-11",status:"Active",salary:95000},
+      {id:"e34",name:"Varun Bhardwaj",email:"varun.bhardwaj@company.com",department:"Product",role:"Growth Product Manager",start:"2023-07-25",status:"Active",salary:102000},
+      {id:"e35",name:"Shreya Iyengar",email:"shreya.iyengar@company.com",department:"Human Resources",role:"People Partner",start:"2024-02-19",status:"Active",salary:75000},
+      {id:"e36",name:"Naman Goyal",email:"naman.goyal@company.com",department:"Finance",role:"Financial Modeler",start:"2023-12-04",status:"Active",salary:88000},
+      {id:"e37",name:"Geetika Roy",email:"geetika.roy@company.com",department:"Engineering",role:"Data Infrastructure Engineer",start:"2022-11-15",status:"Active",salary:104000},
+      {id:"e38",name:"Tushar Agrawal",email:"tushar.agrawal@company.com",department:"Operations",role:"Supply Chain & Logistics Lead",start:"2023-04-11",status:"Active",salary:81000},
+      {id:"e39",name:"Radhika Namboodiri",email:"radhika.namboodiri@company.com",department:"Marketing",role:"SEO & Growth Specialist",start:"2024-06-01",status:"Active",salary:67000},
+      {id:"e40",name:"Akhil Deshpande",email:"akhil.deshpande@company.com",department:"Engineering",role:"Embedded Systems Lead",start:"2021-01-22",status:"Active",salary:118000}
+    ];
+
+    // Cleaned leave requests (Rejected/locked entry for Chinmayee removed)
+    const masterLeaves = [
+      {id:"l1",employee:"Myra Sengupta",type:"Annual Leave",start:"2026-11-18",end:"2026-11-22",reason:"International family vacation",status:"Approved"},
+      {id:"l2",employee:"Vivaan Saxena",type:"Personal Leave",start:"2026-11-25",end:"2026-11-26",reason:"Attending sibling's wedding",status:"Pending"}
+    ];
+
+    const masterKudos = [
+      {id:"k1",from:"Diya Kulkarni",to:"Aarav Nair",badge:"🚀 High Impact",message:"Architected the multi-region failover cluster with zero customer downtime.",date:"2 hours ago"},
+      {id:"k2",from:"Nandini Deshmukh",to:"Kavya Menon",badge:"💡 Deep Craft",message:"The refreshed component library cut frontend delivery time in half.",date:"Yesterday"},
+      {id:"k3",from:"Siddharth Malhotra",to:"Sneha Venkatesh",badge:"⚡ Fast Execution",message:"Closed Q3 payroll reconciliations two full days ahead of schedule!",date:"2 days ago"}
+    ];
+
+    const STORAGE_KEY_VER = "peoplehub_v4_40records";
+
+    function loadData(key, fallback) {
+      try {
+        const val = localStorage.getItem(`${key}_${STORAGE_KEY_VER}`);
+        return val ? JSON.parse(val) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveData(key, val) {
+      try {
+        localStorage.setItem(`${key}_${STORAGE_KEY_VER}`, JSON.stringify(val));
+      } catch {
+        showToast("Storage error.");
+      }
+    }
+
+    let employees = loadData("employees", masterEmployees40);
+    let leaveRequests = loadData("leave", masterLeaves);
+    let kudosList = loadData("kudos", masterKudos);
+    let currentUser = loadData("session", null);
+    let editEmployeeId = null;
+    let toastTimeout;
+
+    let isClockedIn = false;
+    let shiftSeconds = 0;
+    let shiftTimerInterval = null;
+
+    // AUTH & EMAIL PARSING
+    function switchAuthMode(mode) {
+      const isReg = mode === "register";
+      document.getElementById("tabLoginBtn").classList.toggle("active", !isReg);
+      document.getElementById("tabRegisterBtn").classList.toggle("active", isReg);
+      document.getElementById("nameFieldWrap").classList.toggle("hidden", !isReg);
+      document.getElementById("authHeading").textContent = isReg ? "Create account" : "Welcome back";
+      document.getElementById("authSub").textContent = isReg ? "Set up your full name and email to join." : "Sign in with your email — your display name auto-syncs.";
+      document.getElementById("authSubmitBtn").textContent = isReg ? "Create & Enter →" : "Enter Workspace →";
+      document.getElementById("authForm").dataset.mode = mode;
+    }
+
+    function fillDemo(type) {
+      if (type === "admin") {
+        document.getElementById("authEmail").value = "nandini.deshmukh@company.com";
+        document.getElementById("authPassword").value = "admin123";
+        document.getElementById("authRole").value = "Administrator";
+      } else {
+        document.getElementById("authEmail").value = "vivaan.saxena@company.com";
+        document.getElementById("authPassword").value = "emp123";
+        document.getElementById("authRole").value = "Employee";
+      }
+      switchAuthMode("login");
+    }
+
+    function parseNameFromEmail(email) {
+      if (!email || !email.includes("@")) return "Team Member";
+      const localPart = email.split("@")[0];
+      return localPart
+        .split(/[._-]/)
+        .filter(Boolean)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(" ");
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const mode = document.getElementById("authForm").dataset.mode || "login";
+      const email = document.getElementById("authEmail").value.trim();
+      const role = document.getElementById("authRole").value;
+
+      let name = "";
+      if (mode === "register") {
+        name = document.getElementById("authName").value.trim();
+      }
+      if (!name) {
+        const matched = employees.find(emp => emp.email.toLowerCase() === email.toLowerCase());
+        name = matched ? matched.name : parseNameFromEmail(email);
+      }
+
+      currentUser = { name, email, role };
+      saveData("session", currentUser);
+      initAppSession();
+      showToast(`Signed in as ${name}`);
+    }
+
+    function logoutUser() {
+      localStorage.removeItem(`session_${STORAGE_KEY_VER}`);
+      currentUser = null;
+      document.getElementById("appContainer").classList.remove("visible");
+      document.getElementById("authOverlay").style.display = "grid";
+    }
+
+    function initAppSession() {
+      if (!currentUser) return;
+      document.getElementById("authOverlay").style.display = "none";
+      document.getElementById("appContainer").classList.add("visible");
+
+      document.getElementById("userName").textContent = currentUser.name;
+      document.getElementById("userRole").textContent = currentUser.role;
+      document.getElementById("userAvatar").textContent = initials(currentUser.name);
+      document.getElementById("greetingName").textContent = currentUser.name.split(" ")[0];
+
+      const isAdmin = currentUser.role === "Administrator";
+      document.querySelectorAll(".admin-only").forEach(el => {
+        el.style.display = isAdmin ? "" : "none";
+      });
+
+      renderAll();
+    }
+
+    // UI HELPERS
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("show");
+    }
+
+    function navigate(view) {
+      document.querySelectorAll(".view-pane").forEach(s => s.classList.remove("active"));
+      document.getElementById("view-" + view).classList.add("active");
+      document.querySelectorAll(".dock-tab").forEach(b => {
+        b.classList.toggle("active", b.dataset.view === view);
+      });
+
+      const labels = {
+        dashboard: "COMMAND DECK",
+        employees: "PEOPLE DIRECTORY",
+        attendance: "SHIFT ATTENDANCE",
+        leave: "TIME-OFF QUEUE",
+        payroll: "COMPENSATION LEDGER"
+      };
+      document.getElementById("breadcrumb").textContent = labels[view];
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll(".dock-tab").forEach(b => {
+      b.addEventListener("click", () => navigate(b.dataset.view));
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+      const views = ["dashboard", "employees", "attendance", "leave", "payroll"];
+      const idx = Number(e.key) - 1;
+      if (idx >= 0 && idx < views.length && currentUser) {
+        navigate(views[idx]);
+      }
+    });
+
+    function initials(name) {
+      return (name || "U").trim().split(/\s+/).map(p => p[0]).join("").slice(0, 2).toUpperCase();
+    }
+
+    function prettyDate(dateStr) {
+      if (!dateStr) return "";
+      return new Date(dateStr).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    // SHIFT TIMER
+    function toggleShift() {
+      isClockedIn = !isClockedIn;
+      const btn = document.getElementById("clockToggleBtn");
+      const badge = document.getElementById("shiftStatusBadge");
+
+      if (isClockedIn) {
+        btn.textContent = "Clock Out";
+        btn.className = "btn-danger";
+        badge.textContent = "Active Shift";
+        shiftTimerInterval = setInterval(() => {
+          shiftSeconds++;
+          const hrs = String(Math.floor(shiftSeconds / 3600)).padStart(2, "0");
+          const mins = String(Math.floor((shiftSeconds % 3600) / 60)).padStart(2, "0");
+          const secs = String(shiftSeconds % 60).padStart(2, "0");
+          document.getElementById("shiftTimerDisplay").textContent = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+        showToast("Clocked in — shift timer active.");
+      } else {
+        btn.textContent = "Clock In";
+        btn.className = "btn-primary";
+        badge.textContent = "Standby";
+        clearInterval(shiftTimerInterval);
+        showToast("Clocked out — shift logged.");
+      }
+    }
+
+    const todayStr = new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    document.getElementById("currentDate").textContent = todayStr;
+    document.getElementById("attendanceDate").textContent = todayStr;
+
+    const deptSelect = document.getElementById("empDepartment");
+    const deptFilter = document.getElementById("departmentFilter");
+    departments.forEach(d => {
+      deptSelect.innerHTML += `<option value="${d}">${d}</option>`;
+      deptFilter.innerHTML += `<option value="${d}">${d}</option>`;
+    });
+
+    // RENDER PIPELINE
+    function renderAll() {
+      const total = employees.length;
+      const activeCount = employees.filter(e => e.status === "Active").length;
+      const leaveCount = employees.filter(e => e.status === "On leave").length;
+
+      document.getElementById("headcount").textContent = total;
+      document.getElementById("presentCount").textContent = activeCount;
+      document.getElementById("leaveCount").textContent = leaveCount;
+      document.getElementById("departmentCount").textContent = new Set(employees.map(e => e.department)).size;
+      document.getElementById("pendingCount").textContent = leaveRequests.filter(l => l.status === "Pending").length;
+
+      const pct = total ? Math.round((activeCount / total) * 97.4) : 0;
+      document.getElementById("donutActiveArc").setAttribute("stroke-dasharray", `${pct} 100`);
+
+      const engCount = employees.filter(e => e.department === "Engineering").length;
+      const prodCount = employees.filter(e => e.department === "Design" || e.department === "Product").length;
+      const opsCount = employees.filter(e => !["Engineering", "Design", "Product"].includes(e.department)).length;
+
+      document.getElementById("engineeringCount").textContent = engCount;
+      document.getElementById("productCount").textContent = prodCount;
+      document.getElementById("opsCount").textContent = opsCount;
+
+      const safeTotal = total || 1;
+      document.getElementById("engineeringProgress").style.width = Math.round((engCount / safeTotal) * 100) + "%";
+      document.getElementById("productProgress").style.width = Math.round((prodCount / safeTotal) * 100) + "%";
+      document.getElementById("opsProgress").style.width = Math.round((opsCount / safeTotal) * 100) + "%";
+
+      renderEmployees();
+      renderAttendance();
+      renderLeave();
+      renderPayroll();
+      renderKudos();
+
+      const isAdmin = currentUser && currentUser.role === "Administrator";
+      document.querySelectorAll(".admin-only").forEach(el => {
+        el.style.display = isAdmin ? "" : "none";
+      });
+    }
+
+    function renderEmployees() {
+      const search = document.getElementById("employeeSearch").value.toLowerCase();
+      const dept = document.getElementById("departmentFilter").value;
+      const status = document.getElementById("statusFilter").value;
+      const isAdmin = currentUser && currentUser.role === "Administrator";
+
+      const filtered = employees.filter(e => {
+        const matchSearch = e.name.toLowerCase().includes(search) || e.email.toLowerCase().includes(search) || e.role.toLowerCase().includes(search);
+        const matchDept = dept === "All" || e.department === dept;
+        const matchStatus = status === "All" || e.status === status;
+        return matchSearch && matchDept && matchStatus;
+      });
+
+      document.getElementById("employeeTable").innerHTML = filtered.map(e => `
+        <tr>
+          <td>
+            <div class="person-row">
+              <div class="person-av">${initials(e.name)}</div>
+              <div><strong>${e.name}</strong><small>${e.email}</small></div>
+            </div>
+          </td>
+          <td>${e.department}</td>
+          <td>${e.role}</td>
+          <td>${prettyDate(e.start)}</td>
+          <td><span class="status-pill ${e.status === "Active" ? "active" : e.status === "On leave" ? "on-leave" : "inactive"}">${e.status}</span></td>
+          <td class="admin-only" style="display: ${isAdmin ? '' : 'none'};">
+            <button class="table-action-btn" onclick="editEmployee('${e.id}')">Edit</button>
+            <button class="table-action-btn del" onclick="deleteEmployee('${e.id}')">Remove</button>
+          </td>
+        </tr>
+      `).join("") || `<tr><td colspan="6" style="text-align:center; padding: 28px; color: var(--muted);">No matching employee records found.</td></tr>`;
+
+      document.getElementById("dashboardEmployees").innerHTML = employees.slice(0, 5).map(e => `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+          <div class="person-row">
+            <div class="person-av">${initials(e.name)}</div>
+            <div><strong style="font-size:13px;">${e.name}</strong><small>${e.role} · ${e.department}</small></div>
+          </div>
+          <span class="status-pill ${e.status === "Active" ? "active" : "on-leave"}">${e.status}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderAttendance() {
+      document.getElementById("attendanceTable").innerHTML = employees.map((e, idx) => {
+        const minStr = String(10 + (idx % 38)).padStart(2, "0");
+        const checkInTime = e.status === "Active" ? `09:${minStr} AM` : "—";
+        return `
+          <tr>
+            <td>
+              <div class="person-row">
+                <div class="person-av">${initials(e.name)}</div>
+                <strong>${e.name}</strong>
+              </div>
+            </td>
+            <td>${e.department}</td>
+            <td><span class="status-pill ${e.status === "Active" ? "active" : "on-leave"}">${e.status}</span></td>
+            <td style="font: 500 12px 'JetBrains Mono', monospace; color: var(--muted);">${checkInTime}</td>
+            <td><button class="table-action-btn" onclick="showToast('Verified shift for ${e.name}')">Verify</button></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderLeave() {
+      const isAdmin = currentUser && currentUser.role === "Administrator";
+      document.getElementById("leaveTable").innerHTML = leaveRequests.map(l => `
+        <tr>
+          <td><strong>${l.employee}</strong></td>
+          <td>${l.type}</td>
+          <td>${prettyDate(l.start)} → ${prettyDate(l.end)}</td>
+          <td style="color: var(--muted);">${l.reason}</td>
+          <td><span class="status-pill ${l.status === "Approved" ? "active" : l.status === "Pending" ? "on-leave" : "inactive"}">${l.status}</span></td>
+          <td>
+            ${isAdmin && l.status === "Pending" ? `
+              <button class="table-action-btn" onclick="updateLeave('${l.id}', 'Approved')">Approve</button>
+              <button class="table-action-btn del" onclick="updateLeave('${l.id}', 'Rejected')">Reject</button>
+            ` : `<span style="color: var(--muted); font-size: 11px;">${l.status === 'Pending' ? 'Awaiting Admin Review' : 'Locked'}</span>`}
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderPayroll() {
+      const totalSalary = employees.reduce((acc, curr) => acc + (Number(curr.salary) || 0), 0);
+      const formattedTotal = "₹" + totalSalary.toLocaleString("en-IN");
+      const isAdmin = currentUser && currentUser.role === "Administrator";
+
+      document.getElementById("payrollTotal").textContent = formattedTotal;
+      document.getElementById("dashPayrollMini").textContent = "₹" + (totalSalary / 100000).toFixed(1) + "L";
+      document.getElementById("averageSalary").textContent = employees.length ? "₹" + Math.round(totalSalary / employees.length).toLocaleString("en-IN") : "₹0";
+      document.getElementById("payrollEmployees").textContent = employees.length;
+      document.getElementById("payrollMonth").textContent = new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+      const colors = ["#38bdf8", "#34d399", "#818cf8", "#fbbf24", "#f43f5e", "#a78bfa", "#2dd4bf", "#fb923c", "#94a3b8"];
+      const deptTotals = departments.map((d, idx) => {
+        const sum = employees.filter(e => e.department === d).reduce((a, b) => a + (Number(b.salary) || 0), 0);
+        return { name: d, sum, color: colors[idx % colors.length] };
+      }).filter(item => item.sum > 0);
+
+      document.getElementById("payrollSplitBar").innerHTML = deptTotals.map(d => {
+        const w = totalSalary ? ((d.sum / totalSalary) * 100).toFixed(1) : 0;
+        return `<div style="width:${w}%; background:${d.color};" title="${d.name}: ₹${d.sum.toLocaleString('en-IN')}"></div>`;
+      }).join("");
+
+      document.getElementById("payrollSplitLegend").innerHTML = deptTotals.map(d => {
+        const pct = totalSalary ? Math.round((d.sum / totalSalary) * 100) : 0;
+        return `<span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:${d.color};"></span>${d.name} (${pct}%)</span>`;
+      }).join("");
+
+      document.getElementById("payrollTable").innerHTML = employees.map(e => `
+        <tr>
+          <td><strong>${e.name}</strong></td>
+          <td>${e.department}</td>
+          <td>${e.role}</td>
+          <td style="font: 500 13px 'JetBrains Mono', monospace; color: var(--cyan);">₹${(Number(e.salary) || 0).toLocaleString("en-IN")}</td>
+          <td class="admin-only" style="display: ${isAdmin ? '' : 'none'};">
+            <button class="table-action-btn" onclick="editEmployee('${e.id}')">Adjust Salary</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderKudos() {
+      document.getElementById("kudosFeedContainer").innerHTML = kudosList.slice(0, 3).map(k => `
+        <div class="kudos-card">
+          <div class="kudos-top">
+            <strong style="font-size: 13px;">${k.to}</strong>
+            <span class="kudos-badge-tag">${k.badge}</span>
+          </div>
+          <p style="margin: 0 0 8px; font-size: 12px; color: #cbd5e1;">"${k.message}"</p>
+          <small style="color: var(--muted); font-size: 10px;">From ${k.from} · ${k.date}</small>
+        </div>
+      `).join("");
+    }
+
+    // CRUD ACTIONS
+    function openEmployeeModal() {
+      editEmployeeId = null;
+      document.getElementById("employeeModalTitle").textContent = "Add Team Member";
+      document.getElementById("employeeForm").reset();
+      document.getElementById("employeeModal").classList.add("show");
+    }
+
+    function editEmployee(id) {
+      editEmployeeId = id;
+      const emp = employees.find(e => e.id === id);
+      if (!emp) return;
+      document.getElementById("employeeModalTitle").textContent = "Edit Team Member";
+      document.getElementById("empName").value = emp.name;
+      document.getElementById("empEmail").value = emp.email;
+      document.getElementById("empDepartment").value = emp.department;
+      document.getElementById("empRole").value = emp.role;
+      document.getElementById("empStart").value = emp.start;
+      document.getElementById("empStatus").value = emp.status;
+      document.getElementById("empSalary").value = emp.salary || 85000;
+      document.getElementById("employeeModal").classList.add("show");
+    }
+
+    function deleteEmployee(id) {
+      if (confirm("Remove this member from the directory?")) {
+        employees = employees.filter(e => e.id !== id);
+        saveData("employees", employees);
+        renderAll();
+        showToast("Employee record removed.");
+      }
+    }
+
+    function handleEmployeeSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        id: editEmployeeId || "e_" + Date.now(),
+        name: document.getElementById("empName").value,
+        email: document.getElementById("empEmail").value,
+        department: document.getElementById("empDepartment").value,
+        role: document.getElementById("empRole").value,
+        start: document.getElementById("empStart").value,
+        status: document.getElementById("empStatus").value,
+        salary: Number(document.getElementById("empSalary").value) || 85000
+      };
+
+      if (editEmployeeId) {
+        const idx = employees.findIndex(emp => emp.id === editEmployeeId);
+        if (idx !== -1) employees[idx] = payload;
+        showToast("Employee record updated.");
+      } else {
+        employees.unshift(payload);
+        showToast("New employee added to directory.");
+      }
+
+      saveData("employees", employees);
+      closeModal("employeeModal");
+      renderAll();
+    }
+
+    function openLeaveModal() {
+      document.getElementById("leaveForm").reset();
+      document.getElementById("leaveModal").classList.add("show");
+    }
+
+    function handleLeaveSubmit(e) {
+      e.preventDefault();
+      leaveRequests.unshift({
+        id: "l_" + Date.now(),
+        employee: currentUser ? currentUser.name : "Team Member",
+        type: document.getElementById("leaveType").value,
+        start: document.getElementById("leaveStart").value,
+        end: document.getElementById("leaveEnd").value,
+        reason: document.getElementById("leaveReason").value,
+        status: "Pending"
+      });
+      saveData("leave", leaveRequests);
+      closeModal("leaveModal");
+      renderAll();
+      showToast("Time-off request submitted for admin review.");
+    }
+
+    function updateLeave(id, status) {
+      if (currentUser && currentUser.role !== "Administrator") {
+        showToast("Access denied: Admin rights required.");
+        return;
+      }
+      const req = leaveRequests.find(l => l.id === id);
+      if (req) {
+        req.status = status;
+        saveData("leave", leaveRequests);
+        renderAll();
+        showToast(`Leave request ${status.toLowerCase()}.`);
+      }
+    }
+
+    function openKudosModal() {
+      document.getElementById("kudosForm").reset();
+      document.getElementById("kudosModal").classList.add("show");
+    }
+
+    function handleKudosSubmit(e) {
+      e.preventDefault();
+      kudosList.unshift({
+        id: "k_" + Date.now(),
+        from: currentUser ? currentUser.name : "Teammate",
+        to: document.getElementById("kudosTo").value,
+        badge: document.getElementById("kudosBadge").value,
+        message: document.getElementById("kudosMessage").value,
+        date: "Just now"
+      });
+      saveData("kudos", kudosList);
+      closeModal("kudosModal");
+      renderAll();
+      showToast("Kudos published to recognition feed!");
+    }
+
+    function exportCSV() {
+      let csv = "ID,Name,Email,Department,Role,Start Date,Status,Salary\n";
+      employees.forEach(e => {
+        csv += `"${e.id}","${e.name}","${e.email}","${e.department}","${e.role}","${e.start}","${e.status}",${e.salary}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "peoplehub_roster_40.csv";
+      a.click();
+      showToast("Exported all 40 employee records to CSV.");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (currentUser) initAppSession();
+    });
+  </script>
+</body>
+</html>
